@@ -1,0 +1,199 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potato Disease Classification - Model Comparison</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header>
+            <div class="header-content">
+                <div class="header-icon-wrapper">
+                    <i class="fas fa-seedling"></i>
+                </div>
+                <h1>Potato Disease Classification</h1>
+                <p class="subtitle">Comparing Custom CNN vs MobileNetV2</p>
+                <p class="academic-note">Honors - Data Science Project</p>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Upload Section -->
+            <section class="upload-section">
+                <div class="upload-card">
+                    <div class="upload-icon">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                    </div>
+                    <h2>Upload Potato Leaf Image</h2>
+                    <p>Select an image to classify the disease</p>
+                    
+                    <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                    <button class="btn-upload" onclick="document.getElementById('imageInput').click()">
+                        <i class="fas fa-folder-open"></i>
+                        <span>Choose Image</span>
+                    </button>
+                    
+                    <div id="imagePreview" class="image-preview" style="display: none;">
+                        <div class="image-preview-container">
+                            <img id="previewImg" src="" alt="Preview">
+                        </div>
+                        <div class="button-container">
+                            <button class="btn-primary" id="compareBtn" onclick="compareModels()">
+                                <i class="fas fa-search"></i>
+                                <span>Compare Models</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="loading-spinner" style="display: none;">
+                <div class="spinner"></div>
+                <p><i class="fas fa-cog fa-spin"></i> Analyzing with both models...</p>
+            </div>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section" style="display: none;">
+                <!-- Model Predictions Comparison -->
+                <div class="comparison-grid">
+                    <!-- Custom CNN Card -->
+                    <div class="model-card cnn-card">
+                        <div class="model-header">
+                            <h3><i class="fas fa-brain"></i> Custom CNN</h3>
+                            <span class="model-badge">From Scratch</span>
+                        </div>
+                        <div class="prediction-result">
+                            <div class="disease-name" id="cnnPrediction">-</div>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="cnnConfidenceBar"></div>
+                            </div>
+                            <div class="confidence-text" id="cnnConfidence">-</div>
+                        </div>
+                        <div class="model-stats">
+                            <div class="stat">
+                                <span class="stat-label">Inference Time</span>
+                                <span class="stat-value" id="cnnTime">-</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MobileNetV2 Card -->
+                    <div class="model-card mobilenet-card">
+                        <div class="model-header">
+                            <h3><i class="fas fa-network-wired"></i> MobileNetV2</h3>
+                            <span class="model-badge">Transfer Learning</span>
+                        </div>
+                        <div class="prediction-result">
+                            <div class="disease-name" id="mobilenetPrediction">-</div>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" id="mobilenetConfidenceBar"></div>
+                            </div>
+                            <div class="confidence-text" id="mobilenetConfidence">-</div>
+                        </div>
+                        <div class="model-stats">
+                            <div class="stat">
+                                <span class="stat-label">Inference Time</span>
+                                <span class="stat-value" id="mobilenetTime">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agreement Indicator -->
+                <div id="agreementBox" class="agreement-box">
+                    <i id="agreementIcon" class="fas"></i>
+                    <span id="agreementText"></span>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <h3>Confidence Comparison</h3>
+                        <canvas id="confidenceChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <h3>Class Probability Distribution</h3>
+                        <canvas id="probabilityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Model Comparison Table -->
+                <div class="comparison-table">
+                    <h3><i class="fas fa-chart-bar"></i> Model Comparison Summary</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>Custom CNN</th>
+                                <th>MobileNetV2</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Architecture</td>
+                                <td>6 Conv Layers, trained from scratch</td>
+                                <td>Pre-trained on ImageNet, fine-tuned</td>
+                            </tr>
+                            <tr>
+                                <td>Input Size</td>
+                                <td>256 × 256 pixels</td>
+                                <td>224 × 224 pixels</td>
+                            </tr>
+                            <tr>
+                                <td>Training Time</td>
+                                <td>Longer (50 epochs)</td>
+                                <td>Faster (transfer learning)</td>
+                            </tr>
+                            <tr>
+                                <td>Model Size</td>
+                                <td>Smaller</td>
+                                <td>Larger (pre-trained weights)</td>
+                            </tr>
+                            <tr>
+                                <td>Typical Accuracy</td>
+                                <td>Good (85-90%)</td>
+                                <td>Better (90-95%)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Disease Information -->
+                <div class="disease-info">
+                    <h3><i class="fas fa-leaf"></i> About Potato Diseases</h3>
+                    <div class="disease-cards">
+                        <div class="info-card">
+                            <h4>Early Blight</h4>
+                            <p>Caused by <em>Alternaria solani</em>. Shows concentric ring patterns on leaves.</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Late Blight</h4>
+                            <p>Caused by <em>Phytophthora infestans</em>. More severe, water-soaked lesions.</p>
+                        </div>
+                        <div class="info-card">
+                            <h4>Healthy</h4>
+                            <p>No disease symptoms. Green, vibrant leaves with normal growth.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <p>Honors Data Science Project | Custom CNN vs Transfer Learning Comparison</p>
+            <p class="tech-stack">Tech Stack: Flask + TensorFlow + HTML/CSS/JS</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
